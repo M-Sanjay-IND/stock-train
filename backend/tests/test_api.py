@@ -30,7 +30,7 @@ class TestHealthEndpoint:
         assert response.status_code == 200
         data = response.get_json()
         assert data["status"] == "healthy"
-        assert data["service"] == "StockVision AI"
+        assert data["service"] == "Stock Forecast"
 
     def test_health_has_version(self, client):
         """Health endpoint should include version."""

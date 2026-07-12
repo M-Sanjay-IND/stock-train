@@ -10,8 +10,6 @@ import Analytics from './pages/Analytics';
 import Forecast from './pages/Forecast';
 import Compare from './pages/Compare';
 import Watchlist from './pages/Watchlist';
-import About from './pages/About';
-import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
 const App: React.FC = () => {
@@ -29,8 +27,7 @@ const App: React.FC = () => {
                 <Route path="/forecast" element={<Forecast />} />
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/settings" element={<Settings />} />
+
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

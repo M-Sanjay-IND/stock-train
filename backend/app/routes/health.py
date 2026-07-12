@@ -13,7 +13,7 @@ def health_check():
     """Health check endpoint."""
     return jsonify({
         "status": "healthy",
-        "service": "StockVision AI",
+        "service": "Stock Forecast",
         "version": "1.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })

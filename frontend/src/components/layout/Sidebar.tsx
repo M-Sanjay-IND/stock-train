@@ -7,9 +7,8 @@ import {
   TrendingUp,
   GitCompare,
   Star,
-  Info,
-  Settings,
   Activity,
+  Bookmark,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -18,9 +17,7 @@ const navItems = [
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/forecast', icon: TrendingUp, label: 'Forecast' },
   { to: '/compare', icon: GitCompare, label: 'Compare' },
-  { to: '/watchlist', icon: Star, label: 'Watchlist' },
-  { to: '/about', icon: Info, label: 'About' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/watchlist', icon: Bookmark, label: 'Watchlist' },
 ];
 
 interface SidebarProps {
@@ -50,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <h1 className="text-lg font-bold gradient-text">StockVision</h1>
+            <h1 className="text-lg font-bold gradient-text">Stock Forecast</h1>
             <p className="text-[10px] text-muted-foreground -mt-1">AI Forecasting</p>
           </motion.div>
         )}

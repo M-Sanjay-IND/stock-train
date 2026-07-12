@@ -48,9 +48,10 @@ const Landing: React.FC = () => {
             AI-Powered Stock Analytics
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight">
-            <span className="gradient-text">StockVision</span>{' '}
-            <span className="text-foreground">AI</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6">
+            Intelligent <br className="hidden md:block" />
+            <span className="gradient-text">Stock Forecast</span>{' '}
+            <span className="text-muted-foreground/50">Platform</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -71,10 +72,10 @@ const Landing: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/about')}
-              className="px-6 py-3 rounded-xl bg-secondary text-foreground font-semibold border border-border hover:border-primary/30 transition-colors"
+              onClick={() => navigate('/forecast')}
+              className="px-8 py-4 rounded-xl border border-border bg-background hover:bg-accent hover:border-accent text-foreground font-medium transition-all"
             >
-              Learn More
+              Start Forecasting
             </motion.button>
           </div>
         </motion.div>

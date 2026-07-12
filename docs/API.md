@@ -1,4 +1,4 @@
-# StockVision AI — API Documentation
+# Stock Forecast — API Documentation
 
 ## Base URL
 
@@ -18,7 +18,7 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "service": "StockVision AI",
+  "service": "Stock Forecast",
   "version": "1.0.0",
   "timestamp": "2024-01-01T00:00:00Z"
 }

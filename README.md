@@ -1,4 +1,4 @@
-# StockVision AI
+# Stock Forecast
 
 **Intelligent Stock Forecasting & Financial Analytics Platform**
 
