@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Brain, TrendingUp, TrendingDown, RefreshCw, Loader2, Zap, Clock } from 'lucide-react';
+import { Brain, TrendingUp, TrendingDown, RefreshCw, Loader2, Zap } from 'lucide-react';
 import { useStockContext } from '../context/StockContext';
 import { getForecast, trainModels } from '../lib/api';
 import type { ForecastResponse } from '../types';

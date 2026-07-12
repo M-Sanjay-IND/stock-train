@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Trash2, Plus, Loader2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Star, Trash2, Plus, Loader2 } from 'lucide-react';
 import { getWatchlist, addToWatchlist, removeFromWatchlist } from '../lib/api';
 import type { WatchlistEntry } from '../types';
-import { formatCurrency, cn, getPriceColor } from '../lib/utils';
+import { formatCurrency } from '../lib/utils';
 
 const Watchlist: React.FC = () => {
   const navigate = useNavigate();

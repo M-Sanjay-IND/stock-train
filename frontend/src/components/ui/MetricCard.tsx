@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { cn, getPriceColor, formatPercentRaw, formatCurrency } from '../../lib/utils';
+import { cn, getPriceColor, formatPercentRaw } from '../../lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
 interface MetricCardProps {

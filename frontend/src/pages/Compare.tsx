@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { GitCompare, Loader2, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
+import { GitCompare, Loader2, ArrowRight } from 'lucide-react';
 import { getStockInfo, getAnalytics } from '../lib/api';
 import type { StockInfo, Analytics } from '../types';
-import { formatCurrency, formatPercent, formatLargeNumber, cn, getPriceColor } from '../lib/utils';
+import { formatCurrency, formatPercent } from '../lib/utils';
 
 const Compare: React.FC = () => {
-  const [tickers, setTickers] = useState<string[]>(['', '', '']);
+  const [tickers, setTickers] = useState<string[]>(['AAPL', 'MSFT', 'GOOGL']);
   const [stocks, setStocks] = useState<(StockInfo | null)[]>([null, null, null]);
   const [analytics, setAnalytics] = useState<(Analytics | null)[]>([null, null, null]);
   const [loading, setLoading] = useState(false);
 
-  const updateTicker = (i: number, val: string) => {
+  const updateTicker = (index: number, val: string) => {
     const updated = [...tickers];
-    updated[i] = val.toUpperCase();
+    updated[index] = val.toUpperCase();
     setTickers(updated);
   };
 
@@ -24,7 +24,7 @@ const Compare: React.FC = () => {
     setLoading(true);
     try {
       const results = await Promise.allSettled(
-        tickers.map(async (t, i) => {
+        tickers.map(async (t) => {
           if (!t.trim()) return { info: null, analytics: null };
           const [info, analyticsData] = await Promise.all([
             getStockInfo(t),

@@ -81,7 +81,7 @@ const ForecastChart: React.FC<ForecastChartProps> = ({
             color: '#f1f5f9',
             fontSize: 12,
           }}
-          formatter={(value: number, name: string) => [`$${value?.toFixed(2)}`, name]}
+          formatter={(value: any, name: any) => [`$${value?.toFixed(2)}`, name]}
         />
         <Legend wrapperStyle={{ fontSize: 11 }} />
         <Line type="monotone" dataKey="actual" stroke="#94a3b8" dot={false} strokeWidth={1.5} name="Actual" />

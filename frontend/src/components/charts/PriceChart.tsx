@@ -49,7 +49,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, height = 400 }) => {
             fontSize: 12,
           }}
           labelFormatter={(v) => new Date(v).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          formatter={(value: number) => [`$${value.toFixed(2)}`, 'Close']}
+          formatter={(value: any) => [`$${value.toFixed(2)}`, 'Close']}
         />
         <Area
           type="monotone"

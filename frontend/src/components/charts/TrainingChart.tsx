@@ -47,7 +47,7 @@ const TrainingChart: React.FC<TrainingChartProps> = ({
             color: '#f1f5f9',
             fontSize: 12,
           }}
-          formatter={(value: number) => [value?.toFixed(6), '']}
+          formatter={(value: any) => [value?.toFixed(6), '']}
         />
         <Legend wrapperStyle={{ fontSize: 11 }} />
         <Line type="monotone" dataKey="training" stroke="#3b82f6" dot={false} strokeWidth={2} name="Training Loss" />

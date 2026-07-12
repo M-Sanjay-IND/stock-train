@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  DollarSign, TrendingUp, TrendingDown, BarChart3, Activity, Clock,
+  DollarSign, TrendingUp, TrendingDown, BarChart3, Activity,
   ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
 import { useStock } from '../hooks/useStock';
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="text-right">
-          <p className="text-3xl font-bold text-foreground">{formatCurrency(info?.current_price)}</p>
+          <p className="text-3xl font-bold text-foreground">{formatCurrency(info?.current_price ?? 0)}</p>
           <p className={cn('text-sm font-medium', getPriceColor(priceChange))}>
             {priceChange >= 0 ? '+' : ''}{priceChange?.toFixed(2)} ({formatPercentRaw(priceChangePct)})
           </p>

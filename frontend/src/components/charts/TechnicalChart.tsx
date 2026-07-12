@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
-  AreaChart, Area, BarChart, Bar, ComposedChart, ReferenceLine,
+  AreaChart, Area, Bar, ComposedChart, ReferenceLine,
 } from 'recharts';
 import type { TechnicalSeries } from '../../types';
 

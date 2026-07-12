@@ -47,7 +47,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ data, height = 200 }) => {
             color: '#f1f5f9',
             fontSize: 12,
           }}
-          formatter={(value: number) => [value.toLocaleString(), 'Volume']}
+          formatter={(value: any) => [value.toLocaleString(), 'Volume']}
         />
         <Bar dataKey="volume" radius={[2, 2, 0, 0]} fill="#3b82f6" opacity={0.7} />
       </BarChart>

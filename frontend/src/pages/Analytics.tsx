@@ -6,7 +6,7 @@ import { useStock } from '../hooks/useStock';
 import { useStockContext } from '../context/StockContext';
 import MetricCard from '../components/ui/MetricCard';
 import { CardSkeleton } from '../components/ui/Skeleton';
-import { formatCurrency, formatPercent, cn, getPriceColor } from '../lib/utils';
+import { formatCurrency, formatPercent, cn } from '../lib/utils';
 
 const Analytics: React.FC = () => {
   const [searchParams] = useSearchParams();

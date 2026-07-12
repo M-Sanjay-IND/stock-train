@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Moon, Sun, Bell, X } from 'lucide-react';
+import { Search, X, Moon, Sun } from 'lucide-react';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useStockContext } from '../../context/StockContext';
 import { searchStocks } from '../../lib/api';
@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

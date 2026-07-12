@@ -6,7 +6,6 @@ import {
   BarChart3,
   TrendingUp,
   GitCompare,
-  Star,
   Activity,
   Bookmark,
 } from 'lucide-react';
