@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import pandas as pd
 import joblib
+from datetime import timezone
 from typing import Optional
 
 from app.ml.feature_engineering import build_features, get_target_column
@@ -148,7 +149,7 @@ class Predictor:
                     "mape": model_record.mape,
                     "r2_score": model_record.r2_score,
                 },
-                "trained_at": model_record.trained_at.isoformat() if model_record.trained_at else None,
+                "trained_at": model_record.trained_at.replace(tzinfo=timezone.utc).isoformat() if model_record.trained_at else None,
             }
 
         except Exception as e:
@@ -264,7 +265,7 @@ class Predictor:
                 },
                 "training_loss": model_record.to_dict().get("training_loss"),
                 "validation_loss": model_record.to_dict().get("validation_loss"),
-                "trained_at": model_record.trained_at.isoformat() if model_record.trained_at else None,
+                "trained_at": model_record.trained_at.replace(tzinfo=timezone.utc).isoformat() if model_record.trained_at else None,
             }
 
         except Exception as e:

@@ -44,7 +44,7 @@ class Stock(db.Model):
             "market_cap": self.market_cap,
             "current_price": self.current_price,
             "currency": self.currency,
-            "last_updated": self.last_updated.isoformat() if self.last_updated else None,
+            "last_updated": self.last_updated.replace(tzinfo=timezone.utc).isoformat() if self.last_updated else None,
         }
 
 
@@ -102,7 +102,7 @@ class Watchlist(db.Model):
         result = {
             "id": self.id,
             "ticker": self.ticker,
-            "added_at": self.added_at.isoformat() if self.added_at else None,
+            "added_at": self.added_at.replace(tzinfo=timezone.utc).isoformat() if self.added_at else None,
             "notes": self.notes,
         }
         if self.stock_info:
@@ -151,5 +151,5 @@ class TrainedModel(db.Model):
             "r2_score": round(self.r2_score, 4) if self.r2_score else None,
             "training_loss": json.loads(self.training_loss) if self.training_loss else None,
             "validation_loss": json.loads(self.validation_loss) if self.validation_loss else None,
-            "trained_at": self.trained_at.isoformat() if self.trained_at else None,
+            "trained_at": self.trained_at.replace(tzinfo=timezone.utc).isoformat() if self.trained_at else None,
         }
