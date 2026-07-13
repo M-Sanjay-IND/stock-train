@@ -24,6 +24,9 @@ from app.services.data_service import DataService
 
 logger = logging.getLogger("stockvision.ml.trainer")
 
+# Minimum R² score for a model to be considered viable for best-model selection
+MIN_R2_FOR_BEST = 0.5
+
 
 class Trainer:
     """Orchestrates training of all ML models for a given stock."""
@@ -37,7 +40,7 @@ class Trainer:
         ticker: str,
         df: pd.DataFrame,
         lookback: int = 60,
-        epochs: int = 50,
+        epochs: int = 100,
     ) -> dict:
         """
         Train all models (Linear, RF, XGBoost, LSTM) and compare.
@@ -115,9 +118,17 @@ class Trainer:
         # --- Train LSTM (needs sequences) ---
         try:
             logger.info("Training LSTM for %s...", ticker)
+            from app.ml.models.lstm_model import LSTMModel
+
+            # Validate minimum data for LSTM sequences
+            min_lstm_samples = lookback + 20  # At least 20 sequences for meaningful training
+            if len(X_train) < min_lstm_samples:
+                raise ValueError(
+                    f"Not enough training data for LSTM: {len(X_train)} rows, "
+                    f"need at least {min_lstm_samples} (lookback={lookback} + 20 sequences)"
+                )
 
             # Scale features
-            from app.ml.models.lstm_model import LSTMModel
             X_train_scaled, X_test_scaled, feature_scaler = scale_data(X_train, X_test)
 
             # Scale target separately (for inverse transform)
@@ -128,10 +139,16 @@ class Trainer:
             X_train_seq, y_train_seq = create_sequences(X_train_scaled, y_train_scaled, lookback)
             X_test_seq, y_test_seq = create_sequences(X_test_scaled, y_test_scaled, lookback)
 
-            if len(X_train_seq) < 10 or len(X_test_seq) < 5:
-                raise ValueError("Not enough data for LSTM sequences")
+            if len(X_train_seq) < 30:
+                raise ValueError(
+                    f"Not enough LSTM training sequences: {len(X_train_seq)}, need at least 30"
+                )
+            if len(X_test_seq) < 5:
+                raise ValueError(
+                    f"Not enough LSTM test sequences: {len(X_test_seq)}, need at least 5"
+                )
 
-            # Split training for validation
+            # Split training for validation (85/15)
             val_split = int(len(X_train_seq) * 0.85)
             X_tr, X_vl = X_train_seq[:val_split], X_train_seq[val_split:]
             y_tr, y_vl = y_train_seq[:val_split], y_train_seq[val_split:]
@@ -158,6 +175,8 @@ class Trainer:
                 "mape": mape,
                 "r2_score": r2,
             }
+
+            logger.info("LSTM evaluation: RMSE=%.4f, MAE=%.4f, R²=%.4f", rmse, mae, r2)
 
             # Save LSTM model + scalers
             model_path = os.path.join(self.saved_models_dir, f"{ticker}_lstm.keras")
@@ -189,11 +208,31 @@ class Trainer:
             results["models"]["lstm"] = {"error": str(e)}
 
         # --- Determine best model ---
-        valid_metrics = [m for m in results["comparison"] if "rmse" in m and m["rmse"] is not None]
+        # Only consider models with R² >= MIN_R2_FOR_BEST to prevent poorly-trained
+        # models (especially LSTM) from hijacking predictions
+        valid_metrics = [
+            m for m in results["comparison"]
+            if "rmse" in m and m["rmse"] is not None
+            and "r2_score" in m and m["r2_score"] is not None
+            and m["r2_score"] >= MIN_R2_FOR_BEST
+        ]
+
         if valid_metrics:
             best = min(valid_metrics, key=lambda x: x["rmse"])
             results["best_model"] = best["model_type"]
-            logger.info("Best model for %s: %s (RMSE=%.4f)", ticker, best["model_type"], best["rmse"])
+            logger.info("Best model for %s: %s (RMSE=%.4f, R²=%.4f)",
+                        ticker, best["model_type"], best["rmse"], best["r2_score"])
+        else:
+            # Fallback: if no model meets R² threshold, pick the best available
+            all_valid = [m for m in results["comparison"] if "rmse" in m and m["rmse"] is not None]
+            if all_valid:
+                best = min(all_valid, key=lambda x: x["rmse"])
+                results["best_model"] = best["model_type"]
+                logger.warning(
+                    "No model met R²>=%.2f threshold for %s, falling back to %s (R²=%.4f)",
+                    MIN_R2_FOR_BEST, ticker, best["model_type"],
+                    best.get("r2_score", 0)
+                )
 
         # Save feature columns for prediction
         feature_cols_path = os.path.join(self.saved_models_dir, f"{ticker}_feature_columns.json")

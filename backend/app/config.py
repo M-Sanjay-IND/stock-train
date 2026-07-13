@@ -23,8 +23,8 @@ class Config:
 
     # ML Configuration
     MODEL_CACHE_HOURS = int(os.getenv("MODEL_CACHE_HOURS", "24"))
-    LSTM_EPOCHS = int(os.getenv("LSTM_EPOCHS", "150"))
-    LSTM_LOOKBACK = int(os.getenv("LSTM_LOOKBACK", "100"))
+    LSTM_EPOCHS = int(os.getenv("LSTM_EPOCHS", "100"))
+    LSTM_LOOKBACK = int(os.getenv("LSTM_LOOKBACK", "60"))
     SAVED_MODELS_DIR = os.path.join(BASE_DIR, "..", "saved_models")
 
     # Data Configuration

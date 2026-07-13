@@ -8,7 +8,7 @@ for both traditional ML and LSTM models.
 import logging
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, RobustScaler
 from typing import Tuple
 
 logger = logging.getLogger("stockvision.ml.preprocessing")
@@ -43,14 +43,16 @@ def split_data(
 def scale_data(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
-) -> Tuple[np.ndarray, np.ndarray, MinMaxScaler]:
+) -> Tuple[np.ndarray, np.ndarray, RobustScaler]:
     """
-    Apply MinMaxScaler to features.
+    Apply RobustScaler to features.
+    RobustScaler is more resilient to outliers in stock data
+    (e.g. earnings jumps, flash crashes) compared to MinMaxScaler.
 
     Returns:
         scaled_X_train, scaled_X_test, fitted_scaler
     """
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaler = RobustScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
@@ -89,6 +91,7 @@ def create_sequences(
 def create_target_scaler(y_train: pd.Series) -> Tuple[np.ndarray, MinMaxScaler]:
     """
     Create a separate scaler for the target variable (for inverse transform on predictions).
+    Uses MinMaxScaler for the target since LSTM output activation needs bounded range.
 
     Returns:
         scaled_y, target_scaler

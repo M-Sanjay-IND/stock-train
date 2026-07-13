@@ -189,7 +189,19 @@ class StockRepository:
 
     @staticmethod
     def get_best_model(ticker: str) -> Optional[TrainedModel]:
-        """Get the best-performing model for a ticker (lowest RMSE)."""
+        """Get the best-performing model for a ticker (lowest RMSE, with R² guard)."""
+        # First try: models with R² >= 0.5 (prevents poorly-trained models from being selected)
+        best = (
+            TrainedModel.query.filter_by(ticker=ticker.upper())
+            .filter(TrainedModel.rmse.isnot(None))
+            .filter(TrainedModel.r2_score >= 0.5)
+            .order_by(TrainedModel.rmse)
+            .first()
+        )
+        if best:
+            return best
+
+        # Fallback: any model with valid RMSE
         return (
             TrainedModel.query.filter_by(ticker=ticker.upper())
             .filter(TrainedModel.rmse.isnot(None))

@@ -4,7 +4,7 @@ StockVision AI - Forecast Service
 Orchestrates the forecast workflow:
 1. Fetch data
 2. Check model freshness
-3. Train if needed
+3. Train if needed (including LSTM)
 4. Generate predictions
 """
 
@@ -26,7 +26,7 @@ class ForecastService:
     @staticmethod
     def get_forecast(ticker: str, model_type: str = None) -> dict:
         """
-        Get a forecast for a ticker. Trains models if needed.
+        Get a forecast for a ticker. Trains ALL models (including LSTM) if needed.
         """
         ticker = ticker.upper()
         config = current_app.config
@@ -49,7 +49,7 @@ class ForecastService:
         manager = ModelManager(saved_dir, cache_hours=cache_hours)
 
         if manager.needs_training(ticker, data_hash):
-            logger.info("Models need training for %s", ticker)
+            logger.info("Models need training for %s (all models including LSTM)", ticker)
             trainer = Trainer(saved_dir)
             training_result = trainer.train_all_models(
                 ticker, df, lookback=lookback, epochs=epochs
@@ -57,6 +57,12 @@ class ForecastService:
 
             if "error" in training_result:
                 return training_result
+
+            # Log any LSTM training issues (but don't block forecast)
+            lstm_result = training_result.get("models", {}).get("lstm", {})
+            if "error" in lstm_result:
+                logger.warning("LSTM training failed for %s: %s (baseline models still available)",
+                             ticker, lstm_result["error"])
 
         # Step 3: Generate predictions
         predictor = Predictor(saved_dir, lookback=lookback)
@@ -70,7 +76,7 @@ class ForecastService:
 
     @staticmethod
     def force_train(ticker: str) -> dict:
-        """Force retrain all models for a ticker."""
+        """Force retrain all models (including LSTM) for a ticker."""
         ticker = ticker.upper()
         config = current_app.config
         saved_dir = config["SAVED_MODELS_DIR"]

@@ -57,12 +57,15 @@ class Predictor:
             if not model_record:
                 return {"error": f"Model {model_type} not found for {ticker}.", "ticker": ticker}
         else:
+            # get_best_model already has R² >= 0.5 guard
             model_record = StockRepository.get_best_model(ticker)
             if not model_record:
                 return {"error": "No trained models found. Please train models first.", "ticker": ticker}
 
         actual_model_type = model_record.model_type
-        logger.info("Predicting %s with %s model", ticker, actual_model_type)
+        logger.info("Predicting %s with %s model (R²=%.4f, RMSE=%.4f)",
+                     ticker, actual_model_type,
+                     model_record.r2_score or 0, model_record.rmse or 0)
 
         if actual_model_type == "lstm":
             return self._predict_lstm(ticker, df, forecast_days, model_record)
@@ -227,10 +230,8 @@ class Predictor:
                     pred_price = float(target_scaler.inverse_transform(pred_scaled.reshape(-1, 1))[0, 0])
                     predictions.append(pred_price)
 
-                    # Roll the sequence forward (shift by 1, append new prediction features)
+                    # Roll the sequence forward (shift by 1, reuse last row features)
                     new_row = seq[-1].copy()
-                    # Update the close price feature (index 3 typically)
-                    # This is approximate — in practice features would need recomputation
                     seq = np.roll(seq, -1, axis=0)
                     seq[-1] = new_row
 
