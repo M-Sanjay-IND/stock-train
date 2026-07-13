@@ -46,3 +46,4 @@ coverage/
 htmlcov/
 backend/saved_models/*.pt
 *.pt
+backend/saved_models/*.json
