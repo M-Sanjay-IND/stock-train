@@ -464,7 +464,8 @@ VITE_API_URL=https://your-ngrok-url.ngrok-free.app   # or http://localhost:5000
 # Backend
 FLASK_ENV=development
 FLASK_DEBUG=1
-SECRET_KEY=your-secret-key-change-in-production
+# SECURITY: In production, the app will refuse to start unless this is set to a secure string!
+SECRET_KEY=your-secure-random-key-here
 DATABASE_URL=sqlite:///stockvision.db
 
 # ML Configuration
