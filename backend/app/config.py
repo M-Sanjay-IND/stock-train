@@ -66,4 +66,9 @@ config_map = {
 def get_config():
     """Get configuration based on FLASK_ENV environment variable."""
     env = os.getenv("FLASK_ENV", "development")
+    
+    # Security: Ensure a strong secret key is used in production
+    if env == "production" and os.getenv("SECRET_KEY", "dev-secret-key") == "dev-secret-key":
+        raise ValueError("A secure SECRET_KEY environment variable must be provided in production.")
+        
     return config_map.get(env, DevelopmentConfig)
