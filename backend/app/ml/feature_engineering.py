@@ -55,7 +55,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         featured["price_range"] = featured["high"] - featured["low"]
         featured["price_range_pct"] = featured["price_range"] / close.replace(0, np.nan)
 
-    # Drop rows with NaN (from indicator warm-up period)
+    # TARGET: Tomorrow's close minus Today's SMA50 (Stationary Detrending)
+    featured["target_detrended"] = featured["close"].shift(-1) - featured["sma_50"]
+
+    # Drop rows with NaN (from indicator warm-up period AND the last row which has no tomorrow)
     featured.dropna(inplace=True)
 
     logger.info("Built features: %d rows, %d columns", len(featured), len(featured.columns))
@@ -67,10 +70,10 @@ def get_feature_columns(df: pd.DataFrame) -> list[str]:
     Get the list of feature columns to use for training.
     Excludes target and non-feature columns.
     """
-    exclude = {"date", "adj_close", "dividends", "stock_splits", "stock splits"}
+    exclude = {"date", "adj_close", "dividends", "stock_splits", "stock splits", "target_detrended"}
     return [c for c in df.columns if c.lower() not in exclude]
 
 
 def get_target_column() -> str:
     """Return the target column name."""
-    return "close"
+    return "target_detrended"

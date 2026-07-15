@@ -32,15 +32,14 @@ def split_data(
     y = df[target_col]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_ratio, shuffle=True, random_state=42
+        X, y, test_size=test_ratio, shuffle=False
     )
 
     logger.info(
-        "Split data (random shuffle): train=%d, test=%d (%.0f%% test)",
+        "Split data (chronological): train=%d, test=%d (%.0f%% test)",
         len(X_train), len(X_test), test_ratio * 100
     )
     return X_train, X_test, y_train, y_test
-
 
 def scale_data(
     X_train: pd.DataFrame,

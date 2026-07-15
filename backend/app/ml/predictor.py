@@ -94,8 +94,12 @@ class Predictor:
             X = featured_df[feature_cols].values
 
             # Predict on the existing data (for actual vs predicted chart)
-            all_predictions = model.predict(X)
-            actual_values = featured_df[target_col].values
+            all_predictions_detrended = model.predict(X)
+            actual_detrended = featured_df[target_col].values
+            sma_50_values = featured_df["sma_50"].values
+
+            all_predictions_real = all_predictions_detrended + sma_50_values
+            actual_values_real = actual_detrended + sma_50_values
 
             # Create actual vs predicted series
             actual_vs_predicted = []
@@ -103,27 +107,29 @@ class Predictor:
                 date_val = featured_df.index[i]
                 actual_vs_predicted.append({
                     "date": str(date_val.date()) if hasattr(date_val, "date") else str(date_val),
-                    "actual": round(float(actual_values[i]), 2),
-                    "predicted": round(float(all_predictions[i]), 2),
+                    "actual": round(float(actual_values_real[i]), 2),
+                    "predicted": round(float(all_predictions_real[i]), 2),
                 })
 
             # Future forecast using last known features with trend adjustment
             last_features = X[-1:]
-            current_price = float(actual_values[-1])
+            current_price = float(actual_values_real[-1])
+            current_sma_50 = float(sma_50_values[-1])
             forecasts = {}
 
             for days in forecast_days:
-                predicted_price = float(model.predict(last_features)[0])
+                predicted_detrended = float(model.predict(last_features)[0])
+                base_forecast_price = predicted_detrended + current_sma_50
 
-                # Calculate daily change rate from recent predictions
-                if len(all_predictions) > 5:
-                    recent_changes = np.diff(all_predictions[-10:]) / all_predictions[-10:-1]
+                # Calculate daily change rate from recent absolute predictions
+                if len(all_predictions_real) > 5:
+                    recent_changes = np.diff(all_predictions_real[-10:]) / all_predictions_real[-10:-1]
                     avg_daily_change = float(np.mean(recent_changes))
                 else:
                     avg_daily_change = 0
 
                 # Project forward
-                forecast_price = predicted_price * (1 + avg_daily_change * days)
+                forecast_price = base_forecast_price * (1 + avg_daily_change * days)
                 pct_change = ((forecast_price - current_price) / current_price) * 100
 
                 # Confidence interval (based on model RMSE)
@@ -189,6 +195,7 @@ class Predictor:
             feature_cols = [c for c in featured_df.columns if c != target_col]
             X_all = featured_df[feature_cols].values
             y_all = featured_df[target_col].values
+            sma_50_values = featured_df["sma_50"].values
 
             # Scale
             X_scaled = feature_scaler.transform(X_all)
@@ -202,20 +209,22 @@ class Predictor:
 
             # Predict on all sequences
             y_pred_scaled = lstm.predict(X_seq)
-            y_pred = target_scaler.inverse_transform(y_pred_scaled.reshape(-1, 1)).flatten()
+            y_pred_detrended = target_scaler.inverse_transform(y_pred_scaled.reshape(-1, 1)).flatten()
 
             # Actual vs predicted series
             actual_vs_predicted = []
             for i, idx in enumerate(y_seq_idx):
                 date_val = featured_df.index[idx]
+                sma_val = float(sma_50_values[idx])
                 actual_vs_predicted.append({
                     "date": str(date_val.date()) if hasattr(date_val, "date") else str(date_val),
-                    "actual": round(float(y_all[idx]), 2),
-                    "predicted": round(float(y_pred[i]), 2),
+                    "actual": round(float(y_all[idx]) + sma_val, 2),
+                    "predicted": round(float(y_pred_detrended[i]) + sma_val, 2),
                 })
 
             # Future forecasts
-            current_price = float(y_all[-1])
+            current_price = float(y_all[-1]) + float(sma_50_values[-1])
+            current_sma_50 = float(sma_50_values[-1])
             last_sequence = X_scaled[-self.lookback:]  # (lookback, features)
             forecasts = {}
 
@@ -227,7 +236,8 @@ class Predictor:
                 for d in range(days):
                     inp = seq.reshape(1, self.lookback, -1)
                     pred_scaled = lstm.predict(inp)
-                    pred_price = float(target_scaler.inverse_transform(pred_scaled.reshape(-1, 1))[0, 0])
+                    pred_detrended = float(target_scaler.inverse_transform(pred_scaled.reshape(-1, 1))[0, 0])
+                    pred_price = pred_detrended + current_sma_50
                     predictions.append(pred_price)
 
                     # Roll the sequence forward (shift by 1, reuse last row features)

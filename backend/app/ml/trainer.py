@@ -88,11 +88,33 @@ class Trainer:
             ("xgboost", XGBoostModel()),
         ]
 
+        sma_50_test = X_test["sma_50"].values
+
         for model_name, model in baseline_models:
             try:
                 logger.info("Training %s for %s...", model_name, ticker)
                 train_info = model.train(X_train_np, y_train_np)
-                metrics = model.evaluate(X_test_np, y_test_np)
+                
+                # Predict on detrended target
+                y_pred_detrended = model.predict(X_test_np)
+                
+                # Reconstruct absolute price
+                y_pred_real = y_pred_detrended + sma_50_test
+                y_test_real = y_test_np + sma_50_test
+
+                from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+                rmse = float(np.sqrt(mean_squared_error(y_test_real, y_pred_real)))
+                mae = float(mean_absolute_error(y_test_real, y_pred_real))
+                r2 = float(r2_score(y_test_real, y_pred_real))
+                mask = y_test_real != 0
+                mape = float(np.mean(np.abs((y_test_real[mask] - y_pred_real[mask]) / y_test_real[mask])) * 100) if mask.any() else None
+
+                metrics = {
+                    "rmse": rmse,
+                    "mae": mae,
+                    "mape": mape,
+                    "r2_score": r2,
+                }
 
                 # Save model
                 model_path = os.path.join(self.saved_models_dir, f"{ticker}_{model_name}.joblib")
@@ -110,6 +132,7 @@ class Trainer:
 
                 results["models"][model_name] = {**train_info, **metrics}
                 results["comparison"].append(metrics)
+                metrics["model_type"] = model_name
 
             except Exception as e:
                 logger.error("Error training %s: %s", model_name, str(e))
@@ -143,10 +166,11 @@ class Trainer:
 
             # Create sequences from the chronological scaled data
             X_all_seq, y_all_seq = create_sequences(X_all_scaled, y_all_scaled, lookback)
+            sma_50_all = featured_df["sma_50"].values[lookback:]
 
-            # Random shuffle split the sequences
-            X_train_seq, X_test_seq, y_train_seq, y_test_seq = train_test_split(
-                X_all_seq, y_all_seq, test_size=0.2, shuffle=True, random_state=42
+            # Chronological split the sequences
+            X_train_seq, X_test_seq, y_train_seq, y_test_seq, sma_train, sma_test = train_test_split(
+                X_all_seq, y_all_seq, sma_50_all, test_size=0.2, shuffle=False
             )
 
             if len(X_train_seq) < 30:
@@ -166,10 +190,13 @@ class Trainer:
             lstm = LSTMModel(lookback=lookback, epochs=epochs)
             train_info = lstm.train(X_tr, y_tr, X_vl, y_vl)
 
-            # Evaluate on scaled test data, then inverse transform for real metrics
+            # Evaluate on scaled test data, then inverse transform and reconstruct real prices
             y_pred_scaled = lstm.predict(X_test_seq)
-            y_pred_real = target_scaler.inverse_transform(y_pred_scaled.reshape(-1, 1)).flatten()
-            y_test_real = target_scaler.inverse_transform(y_test_seq.reshape(-1, 1)).flatten()
+            y_pred_real_detrended = target_scaler.inverse_transform(y_pred_scaled.reshape(-1, 1)).flatten()
+            y_test_real_detrended = target_scaler.inverse_transform(y_test_seq.reshape(-1, 1)).flatten()
+
+            y_pred_real = y_pred_real_detrended + sma_test
+            y_test_real = y_test_real_detrended + sma_test
 
             from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
             rmse = float(np.sqrt(mean_squared_error(y_test_real, y_pred_real)))
