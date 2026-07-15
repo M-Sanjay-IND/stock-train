@@ -33,8 +33,7 @@ const ForecastChart: React.FC<ForecastChartProps> = ({
         forecastData.push({
           date: date.toISOString().split('T')[0],
           forecast: pred,
-          confidence_upper: dayForecast.confidence_upper,
-          confidence_lower: dayForecast.confidence_lower,
+          confidenceRange: [dayForecast.confidence_lower, dayForecast.confidence_upper],
         });
       });
     }
@@ -87,7 +86,7 @@ const ForecastChart: React.FC<ForecastChartProps> = ({
         <Line type="monotone" dataKey="actual" stroke="#94a3b8" dot={false} strokeWidth={1.5} name="Actual" />
         <Line type="monotone" dataKey="predicted" stroke="#3b82f6" dot={false} strokeWidth={2} name="Predicted" />
         <Line type="monotone" dataKey="forecast" stroke="#8b5cf6" dot={false} strokeWidth={2} strokeDasharray="6 3" name="Forecast" />
-        <Area type="monotone" dataKey="confidence_upper" stroke="none" fill="url(#forecastGrad)" name="Confidence" />
+        <Area type="monotone" dataKey="confidenceRange" stroke="none" fill="url(#forecastGrad)" name="Confidence" />
       </ComposedChart>
     </ResponsiveContainer>
   );

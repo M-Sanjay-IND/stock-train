@@ -129,7 +129,12 @@ class Predictor:
                     avg_daily_change = 0
 
                 # Project forward
-                forecast_price = base_forecast_price * (1 + avg_daily_change * days)
+                daily_predictions = []
+                for d in range(1, days + 1):
+                    daily_price = base_forecast_price * (1 + avg_daily_change * d)
+                    daily_predictions.append(round(daily_price, 2))
+
+                forecast_price = daily_predictions[-1]
                 pct_change = ((forecast_price - current_price) / current_price) * 100
 
                 # Confidence interval (based on model RMSE)
@@ -144,6 +149,7 @@ class Predictor:
                     "trend": "bullish" if pct_change > 0 else "bearish",
                     "confidence_upper": round(forecast_price + confidence, 2),
                     "confidence_lower": round(max(0, forecast_price - confidence), 2),
+                    "daily_predictions": daily_predictions,
                 }
 
             return {
